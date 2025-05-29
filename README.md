@@ -22,21 +22,15 @@ Roboflow에 공개되어 있는 'Dog' Dataset을 사용하였습니다.
 
 train set과 test set이 별도로 분리되어 있지 않아, 모델 개발 과정에서 학습/테스트 셋을 별도로 분리하였습니다.
 
-@misc{
-                            dog-wtbk0_dataset,
-                            title = { dog Dataset },
-                            type = { Open Source Dataset },
-                            author = { oak },
-                            howpublished = { \url{ https://universe.roboflow.com/oak/dog-wtbk0 } },
-                            url = { https://universe.roboflow.com/oak/dog-wtbk0 },
-                            journal = { Roboflow Universe },
-                            publisher = { Roboflow },
-                            year = { 2022 },
-                            month = { jun },
-                            note = { visited on 2025-05-29 },
-                            }
 ## 3.Methodology
+### 사용한 알고리즘
+해당 프로젝트를 진행함에 있어 크게 두 가지 알고리즘을 사용하였습니다.
+1) YOLO v8
+YOLO v8은 Ultraylytics가 2023년에 공개한 실시간 객체 탐지 모델로 이미지를 처리하여 객체를 탐지하고 분류하는 모델이다.
+   
+2) CNN - 
 
+### 개발 과정 중 핵심
 ## 4.Evaluation & Analysis
 
 ## 5.Related Work
