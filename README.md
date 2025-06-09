@@ -19,14 +19,16 @@ YOLO나 MobileNet과 같이 접근성이 좋은 대표적인 모델들을 활용
 
 ## 2.Datasets
 ### About
-1) YOLO 모델 학습용 데이터
+**1) YOLO 모델 학습용 데이터**
 YOLO 모델에 강아지 얼굴을 자동으로 인식하고 crop하도록 학습시키는데에는 Roboflow에 공개되어 있는 ‘Dog’ Dataset을 사용하였습니다.
 해당 데이터셋은 총 2358개의 강아지 사진으로 이루어져있고, 각 사진은 얼굴 부분이 네모 박스로 라벨링 되어 있습니다.
-<img width="585" alt="image" src="https://github.com/user-attachments/assets/2c301208-d47f-400e-b693-0b2806cffa18" />
 
 train set과 test set이 별도로 분리되어 있지 않아, 모델 개발 과정에서 학습/테스트 셋을 별도로 분리하였습니다.
 
-2) MobileNetV2 학습용 데이터
+<img width="585" alt="image" src="https://github.com/user-attachments/assets/2c301208-d47f-400e-b693-0b2806cffa18" />
+
+
+**2) MobileNetV2 학습용 데이터**
 MobileNetV2 모델을 활용하여 강아지 얼굴 사진을 ‘angry’, ‘happy’, ‘relaxed’, ‘sad’의 네 가지 감정으로 분류하기 위해, Roboflow에 공개된 ‘dog_emotions’ 데이터셋을 사용하였습니다.
 이 데이터셋은 총 3,996장의 강아지 얼굴 이미지로 구성되어 있으며, 각 사진은 앞서 언급한 네 가지 감정 중 하나로 라벨링되어 있습니다.
 
