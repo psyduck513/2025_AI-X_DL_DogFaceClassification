@@ -78,15 +78,23 @@ MobileNetV2는 고차원 이미지를 저차원에서의 다양한 특징으로 
 
 보존된 유용한 특징(feature)을 압축·확장하면서 효율적으로 표현하는 블록이 inverted residual block이고, 이를 숫자 벡터들로 정리, fully connected layer와 Softmax를 통해 특징들을 조합 후 확률로 추출하게 됩니다.
 
+
+
 ### 모델링 프로세스
 
+
+
 - #### 0) 제반 사항
+
 
 우선 개발환경의 경우 구글 Colab을 사용했습니다. 팀원 2명 모두 기존에 사용해본 적이 있는 개발환경이었기에 각자의 활용도에 이점이 있었고, 구글 드라이브 상에서 생성 및 수정할 수 있어 협업에 유리했기 때문에 선정했습니다.
 
 팀프로젝트 협업 툴은 구글 드라이브를 채택하였고, 이에 따라 이미지 데이터셋의 업로드, 저장, 편집 또한 구글 드라이브 상에서 진행했습니다. 코드를 통한 데이터 핸들링이 필요할 때에는 구글 Colab에 공유된 구글 드라이브를 마운트하여 진행했습니다.  
 
-#### 1) 강아지 얼굴 인식 모델 - YOLO v8 nano
+
+
+- #### 1) 강아지 얼굴 인식 모델 - YOLO v8 nano
+
 
 YOLO 모델을 사용하기 위해, 가장 먼저 ultralytics 라이브러리를 install 하였습니다.
 ultralytics의 경우 빈번하게 활용되는 여타 라이브러리와 달리 구글 Colab에 설치되어 있지 않기 때문에, 하기 코드를 입력해 직접 install을 진행했습니다.
@@ -106,6 +114,7 @@ yaml_path = f"{extract_path}/data.yaml"
 
 
 이후 하기 코드와 같이 YOLO를 import한 뒤, 신속한 예측이 가능한 yolov8 nano 모델을 선정해 모델 객체를 생성하고 학습을 진행했습니다.
+불러온 yolov8 nano 모델의 경우 COCO 데이터셋을 통해 사전 학습된 모델입니다. 코드를 통한 학습 과정에서는 출력층에 대한 학습만 진항하게 됩니다.
 epochs의 경우 성능과 학습 소요 시간을 고려해 20으로 설정했습니다. 차후 기술하겠지만, epoch 20에서도 준수한 성능이 도출되어 20이면 성능 상 충분하다 판단했습니다.
 이미지 사이즈는 640으로 설정했습니다.
 
@@ -123,8 +132,122 @@ model.train(
 )
 ```
 
-#### 2) 강아지 감정 분류 모델 - MobileNetV2
 
+하단 이미지와 같이 epoch 20에 대한 학습을 완료했습니다.
+
+![image](https://github.com/user-attachments/assets/70680a4e-66bc-4b09-90ee-893eb0ab27cf)
+
+
+
+- #### 2) 강아지 감정 분류 모델 - MobileNetV2
+
+
+모델 학습에 앞서, MobilNetV2 학습에 사용할 강아지 표정 이미지 데이터를 전처리하였습니다.
+각 픽셀 값을 신경망에 입력할 수 있도록 0과 1사이의 값으로 Min-Max 정규화를 진행했습니다. 
+또한 MobilNetV2에 입력할 수 있는 이미지 사이즈와 현재 보유한 강아지 표정 이미지 사이즈가 상이하기 때문에, 모델에 입력 가능하도록 (224, 224) 사이즈로 변환했습니다.
+
+하기 코드와 같이 keras의 ImageDataGenerator을 사용하였고, 정규화를 진행하여 객체(train_datagen, val_datagen)를 생성한 뒤 
+이미지 사이즈를 설정해 새로운 변수(train_generator, val_generator)에 지정했습니다.
+
+```python
+# 데이터 리사이징
+
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+import os
+
+# 데이터 경로
+train_dir = os.path.join(extract_path_1, 'train')
+val_dir = os.path.join(extract_path_1, 'valid')
+
+# 이미지 전처리 (리사이즈 + 정규화)
+train_datagen = ImageDataGenerator(rescale=1./255)
+val_datagen = ImageDataGenerator(rescale=1./255)
+
+# 이미지 제너레이터
+train_generator = train_datagen.flow_from_directory(
+    train_dir,
+    target_size=(224, 224),
+    batch_size=32,
+    class_mode='categorical'
+)
+
+val_generator = val_datagen.flow_from_directory(
+    val_dir,
+    target_size=(224, 224),
+    batch_size=32,
+    class_mode='categorical'
+)
+```
+
+
+MobileNetV2 모델의 경우에도 사전 학습이 진행되어 있습니다.
+이에 하기 코드에서 베이스 모델 객체를 생성할 때 weights 매개변수를 imagenet으로 설정해 imagenet 데이터셋을 통해 학습한 가중치를 불러오고,
+include_top 매개변수를 False로 설정해 출력층은 제외합니다.
+input_shape 매개변수는 앞서 리사이징한 이미지 크기에 맞추어 (224, 224, 3)으로 설정해줍니다.
+base_model의 trainable 속성은 False로 설정해 사전 학습된 가중치를 신규 학습하지 않고 그대로 사용하게 합니다.
+
+```python
+# 사전 학습된 MobileNetV2 불러오기
+base_model = MobileNetV2(weights='imagenet', include_top=False, input_shape=(224, 224, 3))
+base_model.trainable = False  # 사전 학습된 모델로 이미지 특징 추출 -> 출력층 학습만 직접 진행
+```
+
+
+MobileNetV2를 불러오며 제외한 출력층에 대해 하기 코드와 같이 설정해줍니다.
+
+x 변수에 대해 base_model 객체의 마지막 출력값 형태(텐서)를 지정해주고,
+정보 손실을 줄이는 방향으로 최대값 풀링 대신 평균 풀링을 사용하도록 해줍니다.
+마지막으로 Dense() 함수를 통해 x 변수 설정을 활용한 output 출력층을 설정합니다.
+앞서 설정한 train_generator의 출력 클래스 개수를 매개변수로 넣어주고, 다중 분류 문제이기에 소프트맥스 함수를 사용합니다.
+
+```python
+# 출력층 설정
+
+x = base_model.output
+x = GlobalAveragePooling2D()(x)
+output = Dense(train_generator.num_classes, activation='softmax')(x)
+```
+
+
+하기 코드로 앞서 입력층, 출력층을 묶어 모델을 생성해줍니다.
+입력층의 경우 불러온 베이스 모델을 사용하고, 출력층의 경우 이전 코드에서 설정한 output 변수로 설정해줍니다.
+
+```python
+# 입력층, 출력층 설정값을 통해 모델 생성
+
+model = Model(inputs=base_model.input, outputs=output)
+```
+
+
+하기와 같이 모델 컴파일을 진행해 옵티마이저와 손실 함수, 성능 지표를 설정해줍니다.
+옵티마이저의 경우 Adam으로 설정한다. 최근 경로 변화량에 적응적으로 학습하며 진행하던 최적화 속도에 관성을 부여하는 옵티마이저로, 우수하다 평가받으며 가장 대중적으로 사용되기에 선정하였다.
+손실 함수는 다중 분류 문제이기에 크로스엔트로피 함수로 설정했다.
+성능 지표의 경우 다중 분류 문제에 대해 직관적으로 이해하기 쉬운 정분류율(accuracy)를 사용하였다.
+
+```python
+# 모델 컴파일
+
+model.compile(optimizer=Adam(learning_rate=0.001), loss='categorical_crossentropy', metrics=['accuracy'])
+# 손실 함수는 다중 크로스엔트로피 함수
+# 성능 지표는 정분류율
+```
+
+
+마지막으로 하기 코드를 통해 학습을 진행한다.
+앞서 설정한 train_generator, val_generator를 학습 데이터와 검증 데이터로 사용하였다.
+epochs의 경우 학습 소요 시간을 고려해 20으로 설정하였다.
+
+```python
+# 모델 학습
+
+history = model.fit(train_generator, validation_data=val_generator, epochs=20)
+# 성능 확인을 위해 history 변수에 지정
+```
+
+
+후술하겠지만, MobileNetV2의 성능 향상을 위해 일부 하이퍼파리미터 값을 조정하였으나 상기에 기재한 프로세스가 가장 높은 검증 데이터 성능을 보였다.
+사전 학습된 레이어 중 일부를 초기화하고 신규로 학습해 프로젝트 데이터셋에 보다 적합한 학습을 시도해보았고,
+출력층에 Dropout을 추가하여 과대적합을 방지해보고자 하였다. 해당 과정은 4. Evaluation & Anlysis에서 간단히 다루겠다.
 
 
 ## 4.Evaluation & Analysis
