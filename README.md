@@ -91,7 +91,9 @@ MobileNetV2는 고차원 이미지를 저차원에서의 다양한 특징으로 
 YOLO 모델을 사용하기 위해, 가장 먼저 ultralytics 라이브러리를 install 하였습니다.
 ultralytics의 경우 빈번하게 활용되는 여타 라이브러리와 달리 구글 Colab에 설치되어 있지 않기 때문에, 하기 코드를 입력해 직접 install을 진행했습니다.
 
-```python !pip install ultralytics```
+```python
+!pip install ultralytics
+```
 
 
 YOLO 모델의 아키텍처를 설정하는 yalm 파일의 경우, 데이터셋 zip 파일에 내포되어 있던 yalm 파일을 그대로 사용했습니다.
