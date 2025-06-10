@@ -252,6 +252,14 @@ history = model.fit(train_generator, validation_data=val_generator, epochs=20)
 
 ## 4.Evaluation & Analysis
 
+
+- #### 1) 강아지 얼굴 인식 모델 - YOLO v8 nano
+
+![image](https://github.com/user-attachments/assets/a34d0f3e-1d4b-4d69-8863-14cf96665564)
+
+![image](https://github.com/user-attachments/assets/33e84ef4-6442-4079-85e1-82f3ff27466e)
+
+
 ## 5.Related Work
 YOLOv8 and Dog Face Detection
 https://www.kaggle.com/code/martinpelaezdiaz/dog-face-detection-with-yolov8-and-ultraytics#5.-Model-Selection-and-Configuration
