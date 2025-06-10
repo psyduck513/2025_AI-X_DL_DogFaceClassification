@@ -91,21 +91,21 @@ MobileNetV2는 고차원 이미지를 저차원에서의 다양한 특징으로 
 YOLO 모델을 사용하기 위해, 가장 먼저 ultralytics 라이브러리를 install 하였습니다.
 ultralytics의 경우 빈번하게 활용되는 여타 라이브러리와 달리 구글 Colab에 설치되어 있지 않기 때문에, 하기 코드를 입력해 직접 install을 진행했습니다.
 
-'''!pip install ultralytics'''
+```!pip install ultralytics```
 
 
 YOLO 모델의 아키텍처를 설정하는 yalm 파일의 경우, 데이터셋 zip 파일에 내포되어 있던 yalm 파일을 그대로 사용했습니다.
 따라서 하기 코드를 작성해 yaml 파일의 path를 정의하였습니다. extract_path의 경우 압축 해제한 데이터 폴더에 해당하는 구글 드라이브 주소로 정의해두었습니다.
 
-'''# 기존 YAML 파일 경로 지정
-yaml_path = f"{extract_path}/data.yaml"'''
+```# 기존 YAML 파일 경로 지정
+yaml_path = f"{extract_path}/data.yaml"```
 
 
 이후 하기 코드와 같이 YOLO를 import한 뒤, 신속한 예측이 가능한 yolov8 nano 모델을 선정해 모델 객체를 생성하고 학습을 진행했습니다.
 epochs의 경우 성능과 학습 소요 시간을 고려해 20으로 설정했습니다. 성능의 경우 차후 기술하겠지만, epoch 20에서도 준수한 수준이 도출되어 20이면 성능 상 충분하다 판단했습니다.
 이미지 사이즈는 640으로 설정했습니다.
 
-'''# 모델 학습
+```# 모델 학습
 
 from ultralytics import YOLO
 
@@ -115,7 +115,7 @@ model.train(
     data=yaml_path,
     epochs=20,
     imgsz=640
-)'''
+)```
 
 **2) 강아지 감정 분류 모델 - MobileNetV2**
 
