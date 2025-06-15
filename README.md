@@ -255,10 +255,121 @@ history = model.fit(train_generator, validation_data=val_generator, epochs=20)
 
 - #### 1) 강아지 얼굴 인식 모델 - YOLO v8 nano
 
+
+성능 지표로는 Precision(정밀도), Recall(재현율), mAP를 선정해 검토했습니다.
+ 
+ 
+Precision의 경우 모델이 양성이라고 예측한 것 중에 실제 양성인 경우의 비율입니다. 
+본 프로젝트의 상황에서는 모델이 강아지 얼굴이 있다고 예측한 박스들 중, 실제로 박스 영역이 강아지 얼굴을 포함하고 있는 경우의 비율입니다. 
+ 
+ 
+Recall은 실제로 양성인 경우 중에 모델이 양성이라고 예측한 경우의 비율입니다.
+본 프로젝트의 상황에서는 강아지 얼굴이 존재하는 모든 이미지 중, 모델이 강아지 얼굴 영역에 적절히 박스를 그린 경우의 비율입니다.
+ 
+ 
+하기 표에 기반하여 기술하자면 Precision = TP / (TP + FP), Recall = TP / (TP + FN) 이라 정의할 수 있습니다. 
+
+![image](https://github.com/user-attachments/assets/c3ecdd4f-b93a-4f04-b596-a9a1016d566a)
+ 
+ 
+그러나 Precision과 Recall의 경우 trade-off되는 경향이 있습니다. 
+모델이 예측한 경우들이 실제로 어느 정도 옳을지를 알려주는 값을 신뢰도라고 하는데, 
+신뢰도가 높을수록 자연히 Precision 값은 높아지고 Recall 값은 낮아집니다. 
+반대로 신뢰도가 낮아질수록 Precision 값은 낮아지고 Recall 값은 높아집니다. 
+
+ 
+따라서 신뢰도와 무관하게 Precision과 Recall 값을 대변할 수 있는 지표가 필요한데, 그것이 바로 AP(Average Precision) 값입니다. 
+신뢰도에 따른 Precision과 Recall 값의 곡선을 그려 그 면적을 계산한 것이 AP이고, 
+타겟 컬럼이 여러 개의 클래스를 포함하고 있는 경우 그 수만큼 나눠준 것이 mAP(mean Average Precision)입니다.
+본 프로젝트의 경우는 이미지의 특정 영역에 강아지 얼굴이 있는지 없는지를 예측하는 이진 분류 문제임에 클래스가 하나이므로, AP와 mAP가 동일합니다. 
+ 
+ 
+그렇다면 어떠한 경우에 박스를 적절히 그렸다 판단할지에 대한 기준이 필요합니다.
+해당 기준은 IoU 값으로 설정했습니다. 
+IoU 값은 예측한 박스와 실제 박스를 합친 영역 중 예측한 박스와 실제 박스가 중복되는 영역의 비율입니다.
+하기 사진과 같이 설명할 수 있겠습니다. 
+
+![image](https://github.com/user-attachments/assets/2308805d-7748-46b5-b144-b300bca6933f)
+ 
+본 프로젝트에서는 IoU 0.5 이상을 기준으로 예측이 옳다고 판단한 Precision, Recall, mAP 값과 
+IoU 0.5에서 0.95까지를 기준으로 하였을 때의 평균 mAP 값을 검토했습니다.
+
+각 에포크에 따라 검증 데이터에 대한 성능 지표를 검토한 결과는 하기 시각화와 같습니다.
+ 
 ![image](https://github.com/user-attachments/assets/a34d0f3e-1d4b-4d69-8863-14cf96665564)
+ 
+에포크 20까지만 학습을 진행하여도 IoU 0.5 기준으로 0.95 이상의 우수한 Precision, Recall, mAP@0.5 값을 얻을 수 있었습니다. 
+mAP@0.5:0.95 값 또한 에포크 20에서 0.8 이상을 얻을 수 있었습니다. 
 
+실제 상세 값의 경우 하기에 출력한 데이터프레임과 같습니다. 
+ 
 ![image](https://github.com/user-attachments/assets/33e84ef4-6442-4079-85e1-82f3ff27466e)
+ 
+결과적으로 해당 YOLO v8 nano 모델은 IoU 50을 기준으로 성능 지표를 계산할 경우 높은 수준의 성능을 보입니다.
+ 
+- #### 2) 강아지 감정 분류 모델 - MobileNetV2
+ 
 
+강아지 감정 분류 모델의 성능 지표는 Accuracy(정분류율)을 사용했습니다. 
+정분류율은 전체 예측값 중 실제값을 맞춘 경우의 비율로, 
+하기 표에 기반하자면 (TP + TN) / (TP + FP + FN + TN) 으로 정의할 수 있습니다. 
+
+![image](https://github.com/user-attachments/assets/c3ecdd4f-b93a-4f04-b596-a9a1016d566a) 
+ 
+감정 분류 모델의 경우 클래스가 4개인 다중 분류 문제이므로 
+클래스별로 평균값을 내야 하는 Precision, Recall 보다 직관적인 Accuracy를 사용했습니다. 
+
+다만 첫 학습에서 하기 그래프와 같이 에포크 20까지 검증 데이터에 대한 Accuracy가 0.7을 초과하지 못했습니다. 
+ 
+![image](https://github.com/user-attachments/assets/fbe4e655-2a99-4db5-813f-f2fc2d501d66)
+ 
+전체 예측값 중 약 2/3만이 정답이라면 조금 부족한 수준의 성능이라 판단했습니다. 
+따라서 MobileNetV2의 사전 학습된 레이어 중 마지막 30개 층을 보유한 데이터셋에 맞추어 직접 학습해보면서, 
+30%의 드롭아웃을 적용해 과대적합을 방지하고자 했습니다. 
+
+```python
+# 베이스 모델의 일부 층 직접 학습 여부 설정
+
+
+# 사전 학습된 MobileNetV2 불러오기
+base_model = MobileNetV2(weights='imagenet', include_top=False, input_shape=(224, 224, 3))
+
+# 마지막 30개 층만 학습 진행
+base_model.trainable = False
+for layer in base_model.layers[:-30]:  # 마지막 30개 층만 훈련 가능하게 설정
+    layer.trainable = False
+
+
+# 출력층 직전에 Dropout 추가
+
+
+x = base_model.output
+x = GlobalAveragePooling2D()(x)
+x = Dropout(0.3)(x)  # 30% 드롭아웃
+output = Dense(train_generator.num_classes, activation='softmax')(x)
+```
+ 
+ 
+에포크 또한 30으로 높이고 성능 진척이 크게 이루어지지 않는다면 학습을 중지하도록 콜백을 설정했습니다. 
+
+```python
+# 콜백 설정
+
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
+
+checkpoint_cb = ModelCheckpoint('best_model.keras', save_best_only=True)
+early_stopping_cb = EarlyStopping(patience=5, restore_best_weights=True)
+```
+
+
+그러나 하기 그래프와 같이 검증 데이터에 대해서 유의미한 Accuracy 향상이 이루어지지 않았고, 
+오히려 에포크별 성능 지표가 더 불규칙적으로 변했습니다. 
+직접 학습을 진행할 층의 개수와 드롭아웃 비율을 조정하여도 성능 추이는 비슷했습니다. 
+
+
+
+따라서 목차 3.Methodology에서 설정했던 초기 하이퍼파라미터 값으로 도출한 모델을 최종 선정했습니다. 
+결과적으로 해당 MobileNetV2 모델은 0.7 이하의 다소 부족한 성능을 보입니다. 
 
 ## 5.Related Work
 YOLOv8 and Dog Face Detection
@@ -268,6 +379,8 @@ Emotion classification with minimal epochs
 https://www.nature.com/articles/s41598-022-11173-0
 
 ## 6.Conclusions
+
+
 
 ## 7.Works Cited
 https://docs.ultralytics.com/ko/models/yolov8/#yolov8-usage-examples
