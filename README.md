@@ -1,3 +1,6 @@
+## 발표영상
+https://youtu.be/N9dSJrVU6hw
+
 # 0.Project info
   
 ### Class
