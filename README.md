@@ -10,9 +10,9 @@ https://youtu.be/N9dSJrVU6hw
 YOLO를 활용한 강아지 얼굴 인식 · 감정 분류 모델
   
 ### Members 
-이형민 국제학부 2020082942 | hmlee2019@gmail.com
+이형민 국제학부 2020082942 | 모델 설계 및 개발 초반 단계 / 블로그 작성 / 영상 녹화 | hmlee2019@gmail.com
   
-주예찬 경영학부 2019028977 | teotwg513@gmail.com
+주예찬 경영학부 2019028977 | 모델 디벨롭 및 최종 완성 / 블로그 작성 | teotwg513@gmail.com
   
   
 # 1.Proposal (Option A)
@@ -421,3 +421,5 @@ https://docs.ultralytics.com/ko/models/yolov8/#yolov8-usage-examples
 https://www.ultralytics.com/ko/glossary/convolutional-neural-network-cnn?utm_source=chatgpt.com
 https://blog.naver.com/skfnsid123/223199760485
 https://velog.io/@woojinn8/LightWeight-Deep-Learning-7.-MobileNet-v2
+
+
